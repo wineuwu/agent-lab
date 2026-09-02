@@ -7,11 +7,7 @@ from pathlib import Path
 MODEL = "qwen2.5:3b"
 URL = "http://localhost:11434/api/chat"
 
-TOOL_FUNCTIONS = {
-    "list_dir": list_dir,
-    "read_file": read_file,
-    "write_file": write_file,
-}
+
 
 
 TOOLS = [
@@ -59,13 +55,8 @@ TOOLS = [
         },
     },
 ]
-call = {
-    "name": "write_file",
-    "arguments": {"path": "./hello.txt", "content": "hi"},
-}
-func = TOOL_FUNCTIONS[call["name"]]
-print(func(**call["arguments"]))
-print(TOOL_FUNCTIONS["read_file"](path="workspace/hello.txt"))
+
+
 
 
 def chat(msg):
@@ -99,9 +90,19 @@ def write_file(path, content):
     Path(path).write_text(content)
     return f"已寫入 {path}"
 
+TOOL_FUNCTIONS = {
+    "list_dir": list_dir,
+    "read_file": read_file,
+    "write_file": write_file,
+}
+
 
 if __name__ == "__main__":
-    # reply = chat([{"role": "user", "content": "請列出目前資料夾有哪些檔案?"}])
-    # print(reply)
-    write_file("./hello.txt", "hello")
-    print(read_file("./hello.txt"))
+    call = {
+        "name": "write_file",
+        "arguments": {"path": "workspace/hello.txt", "content": "hi"},
+    }
+    func = TOOL_FUNCTIONS[call["name"]]
+    print(func(**call["arguments"]))
+    print(TOOL_FUNCTIONS["read_file"](path="workspace/hello.txt"))
+    
