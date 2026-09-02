@@ -31,7 +31,7 @@ Step 1 最小循環 ──► Step 2 邊界 ──► Step 3 功能清單 ──
 | 1-1 | `chat(messages)`：用 `urllib` POST 到 Ollama，回傳 `message` | `import`、`def/return`、dict、`json`、`with`、`if __name__` | ✅ 完成（commit `b2b4783`） |
 | 1-2 | 定義工具：用 JSON Schema 告訴模型有 `list_dir / read_file / write_file` 三個工具 | 巢狀 dict、list、把 `tools` 加進 request | ✅ 完成（commit `f3c5629`） |
 | 1-3 | 執行工具：寫三個對應的 Python 函式，用「名稱 → 函式」字典分派 | `os`/`pathlib`、開檔讀寫、dict 當 switch、`**kwargs` 展開參數 | ✅ 完成 |
-| 1-4 | 主循環：`while True` 收 `tool_calls`、執行、以 `role: tool` 回填，直到模型不再要工具 | `while`、`for`、`if/else`、`append`、`break` | ⬜ |
+| 1-4 | 主循環：`while True` 收 `tool_calls`、執行、以 `role: tool` 回填，直到模型不再要工具 | `while`、`for`、`if/else`、`append`、`break` | ✅ 完成 |
 
 **驗收**：給任務「在 workspace/ 建 hello.txt，內容寫今天日期」，agent 真的建出檔案。
 **預期會看到的失敗**（留下紀錄，這是 Step 2 的動機）：模型亂走目錄、寫到 workspace 外、做完不停、或說「做好了」但檔案不在。
@@ -87,3 +87,4 @@ Step 1 最小循環 ──► Step 2 邊界 ──► Step 3 功能清單 ──
 
 - 2026-08-26：環境就緒（Ollama + qwen2.5:3b），Step 1-1 完成。
 - 2026-09-02：1-2 完成（模型會回 tool_calls）；1-3 完成（三個工具函式 + TOOL_FUNCTIONS 分派，手動測通過）。中途踩坑：回傳 generator 而非字串、頂層程式先於定義執行（NameError，見 WIP commit）。下一步：1-4 主循環。
+- 2026-09-02：1-4 完成，Step 1 收官——agent 迴圈能自主「開單→執行→回填→收工」，成功建檔。**採到關鍵失敗證據**：驗收任務「寫今天日期」，模型寫入的是字面文字 `今天是 $(date)`（想像自己有 shell），卻回報「已成功寫入今天的日期」——「宣稱完成 ≠ 真的完成」，這就是 Step 4 驗證器存在的理由。下一步：Step 2 邊界。

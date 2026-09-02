@@ -8,8 +8,6 @@ MODEL = "qwen2.5:3b"
 URL = "http://localhost:11434/api/chat"
 
 
-
-
 TOOLS = [
     {
         "type": "function",
@@ -57,8 +55,6 @@ TOOLS = [
 ]
 
 
-
-
 def chat(msg):
 
     body = {"model": MODEL, "messages": msg, "stream": False, "tools": TOOLS}
@@ -71,7 +67,25 @@ def chat(msg):
         result = json.loads(raw)
 
         return result["message"]
+    
 
+def agent(task) :
+    messages = [{ "role": "user", "content": task }]
+    
+    while True: 
+        reply = chat(messages)
+        messages.append(reply)
+
+        if "tool_calls" not in reply:
+            print(reply["content"])
+            break
+
+        for call in reply["tool_calls"]:
+            func = call["function"]
+            tool_name = func["name"]
+            tool_args = func["arguments"]
+            result = TOOL_FUNCTIONS[tool_name](**tool_args)
+            messages.append({"role": "tool", "content": result})
 
 # 列出資料夾目錄
 def list_dir(path):
@@ -98,11 +112,6 @@ TOOL_FUNCTIONS = {
 
 
 if __name__ == "__main__":
-    call = {
-        "name": "write_file",
-        "arguments": {"path": "workspace/hello.txt", "content": "hi"},
-    }
-    func = TOOL_FUNCTIONS[call["name"]]
-    print(func(**call["arguments"]))
-    print(TOOL_FUNCTIONS["read_file"](path="workspace/hello.txt"))
+    agent("請在 workspace 資料夾裡建立 hello.txt,內容寫今天日期")
     
+
